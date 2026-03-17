@@ -1,0 +1,18 @@
+diff --git a/proximity.py b/proximity.py
+index b791961..22c9eaa 100755
+--- a/proximity.py
++++ b/proximity.py
+@@ -1424,10 +1424,11 @@ if __name__ == '__main__':
+                                    {'create_empty': False, 'file_error': True, 'configspec': conf_specs})
+ 
+                 # first validate it
+-                config.validate(vdt, copy=True)
++                config.validate(vdt)
+ 
+                 # rewrite it in a secure manner
+-                config.write()
++                # (disabled due to read-only symlinking to /nix/store)
++                # config.write()
+ 
+                 # if everything worked add this config as functioning
+                 configs.append([filename[:-5], config])

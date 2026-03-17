@@ -143,35 +143,40 @@ in
     home.file = lib.mapAttrs' (
       name: profile:
       nameValuePair ".blueproximity/${name}.conf" {
-        text = generators.toINIWithGlobalSection { } {
-          globalSection = {
-            device_mac = profile.address;
-            device_channel = profile.channel;
+        text =
+          generators.toINIWithGlobalSection
+            {
+              mkKeyValue = key: value: "${key} = ${toString value}";
+            }
+            {
+              globalSection = {
+                device_mac = profile.address;
+                device_channel = profile.channel;
 
-            # Lock
-            lock_distance = profile.lockDistance;
-            lock_duration = profile.lockDuration;
-            lock_command = profile.lockCommand;
+                # Lock
+                lock_distance = profile.lockDistance;
+                lock_duration = profile.lockDuration;
+                lock_command = profile.lockCommand;
 
-            # Unlock
-            unlock_distance = profile.unlockDistance;
-            unlock_duration = profile.unlockDuration;
-            unlock_command = profile.unlockCommand;
+                # Unlock
+                unlock_distance = profile.unlockDistance;
+                unlock_duration = profile.unlockDuration;
+                unlock_command = profile.unlockCommand;
 
-            # Keep-awake
-            proximity_command = profile.proximityCommand;
-            proximity_interval = profile.proximityInterval;
+                # Keep-awake
+                proximity_command = profile.proximityCommand;
+                proximity_interval = profile.proximityInterval;
 
-            # Ringbuffer for approximating distance
-            buffer_size = profile.bufferSize;
+                # Ringbuffer for approximating distance
+                buffer_size = profile.bufferSize;
 
-            # Logging
-            log_to_syslog = profile.syslogFacility != null;
-            log_syslog_facility = lib.optionalString (profile.syslogFacility != null) profile.syslogFacility;
-            log_to_file = profile.logFile != null;
-            log_filelog_filename = lib.optionalString (profile.logFile != null) profile.logFile;
-          };
-        };
+                # Logging
+                log_to_syslog = if profile.syslogFacility != null then "True" else "False";
+                log_syslog_facility = lib.optionalString (profile.syslogFacility != null) profile.syslogFacility;
+                log_to_file = if profile.logFile != null then "True" else "False";
+                log_filelog_filename = lib.optionalString (profile.logFile != null) profile.logFile;
+              };
+            };
       }
     ) cfg.profiles;
   };

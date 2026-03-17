@@ -18,25 +18,26 @@
         pkgs = import nixpkgs { inherit system; };
       in
       {
-        packages.default = pkgs.python3Packages.buildPythonApplication {
+        packages.default = pkgs.python3Packages.buildPythonApplication rec {
           pname = "blueproximity";
           version = "1.3.3";
 
           src = pkgs.fetchFromGitHub {
             owner = "tiktaalik-dev";
             repo = "blueproximity";
-            rev = "v1.3.3";
+            rev = "v${version}";
             sha256 = "sha256-QTrJJgtgI5c2bUub6G9o+ujHvqgCqYG1+pvvnjcsvMU=";
           };
 
-          patches = [ ./patches/fix-gobject.patch ];
+          patches = [
+            ./patches/fix-gobject.patch
+            ./patches/fix-config.patch
+          ];
 
           nativeBuildInputs = with pkgs; [
             gobject-introspection
             libappindicator-gtk3
             wrapGAppsHook3
-            #desktop-file-utils
-            #hicolor-icon-theme
           ];
 
           propagatedBuildInputs =
@@ -54,7 +55,6 @@
             ]);
 
           pyproject = false;
-          #build-system = with pkgs.python3Packages; [ setuptools ];
 
           installPhase = ''
             mkdir -p $out/bin
