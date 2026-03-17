@@ -1,0 +1,121 @@
+diff --git a/proximity.py b/proximity.py
+index b791961..90eaa9d 100755
+--- a/proximity.py
++++ b/proximity.py
+@@ -47,29 +47,31 @@ import struct
+ if dist_path == './':
+     dist_path = os.getcwd() + '/'
+ 
+-# Init the list of languages to support
+-local_path = dist_path + 'LANG/'
+-langs = []
++local_path = os.path.join(dist_path, 'LANG/')
++try:
++    locale.setlocale(locale.LC_ALL, '')  # '' uses the user's default locale
++except locale.Error:
++    print("Warning: Could not set the desired locale. Using default.")
+ 
+-# Check the default locale
+-lc, encoding = locale.getdefaultlocale()
++# Get the current locale
++lc, encoding = locale.getlocale()
++langs = [lc] if lc else ["en"]  # Default to English if no locale is detected
+ 
+-if lc:
+-    # If we have a default, it's the first in the list
+-    langs = [lc]
++# 'local_path' should point to the directory where your .mo files are located
++lang = gettext.translation(APP_NAME, localedir=local_path, languages=langs, fallback=True)
++lang.install() # Install _() into builtins to use translations
+ 
+-# Now lets get all of the supported languages on the system
+-language = os.environ.get('LANGUAGE', None)
++language_env = os.environ.get('LANGUAGE')
+ 
+-if language:
++if language_env:
+     # Language comes back something like en_CA:en_US:en_GB:en
+-    # on linux systems, on Win32 it's nothing, so we need to
+-    # split it up into a list
+-    langs += language.split(":")
++    # Split it up into a list
++    langs.extend(language_env.split(":"))
+ 
+-# Now add on to the back of the list the translations that we
+-# know that we have, our defaults
+-langs += ["en"]
++# 4. Add Default Fallback Language
++# Ensure "en" is at the end as a fallback
++if "en" not in langs:
++    langs.append("en")
+ 
+ # Now langs is a list of all of the languages that we are going
+ # to try to use.  First we check the default, then what the system
+@@ -377,7 +379,7 @@ class ProximityGUI(object):
+ 
+     # Callback to rename a config file.
+     def dlgRenameDo_clicked(self, widget, data=None):
+-        newconfig = self.wTree.get_widget("entryRenameName").get_text()
++        newconfig = self.wTree.get_object("entryRenameName").get_text()
+         # check if something has been entered
+         if newconfig == '':
+             dlg = gtk.MessageDialog(None, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
+@@ -431,7 +433,7 @@ class ProximityGUI(object):
+ 
+     # Callback to create a config file.
+     def dlgNewDo_clicked(self, widget, data=None):
+-        newconfig = self.wTree.get_widget("entryNewName").get_text()
++        newconfig = self.wTree.get_object("entryNewName").get_text()
+ 
+         # check if something has been entered
+         if (newconfig == ''):
+@@ -456,7 +458,9 @@ class ProximityGUI(object):
+ 
+         # then let's get it on...
+         # create the new config
+-        newconf = ConfigObj(self.config.dict())
++        newconf = ConfigObj(indent_type='  ')
++        newconf.merge(self.config.dict())
++
+         newconf.filename = newname
+ 
+         # and save it to the new name
+@@ -827,7 +831,7 @@ class ProximityGUI(object):
+         model, selection_iter = selection.get_selected()
+         if (selection_iter):
+             mac = self.model.get_value(selection_iter, 0)
+-            self.wTree.get_widget("entryMAC").set_text(mac)
++            self.wTree.get_object("entryMAC").set_text(mac)
+             self.writeSettings()
+ 
+     # Callback that is executed when the scan for devices button is clicked
+@@ -1420,8 +1424,12 @@ if __name__ == '__main__':
+             try:
+ 
+                 # add every valid .conf file to the array of configs
+-                config = ConfigObj(os.path.join(conf_dir, filename),
+-                                   {'create_empty': False, 'file_error': True, 'configspec': conf_specs})
++                config = ConfigObj(
++                    os.path.join(conf_dir, filename),
++                    create_empty=False,
++                    file_error=True,
++                    configspec=conf_specs
++                )
+ 
+                 # first validate it
+                 config.validate(vdt, copy=True)
+@@ -1438,8 +1446,12 @@ if __name__ == '__main__':
+ 
+     # no previous configuration could be found so let's create a new one
+     if new_config:
+-        config = ConfigObj(os.path.join(conf_dir, _('standard') + '.conf'),
+-                           {'create_empty': True, 'file_error': False, 'configspec': conf_specs})
++        config = ConfigObj(
++            os.path.join(conf_dir, _('standard') + '.conf'),
++            create_empty=True,
++            file_error=False,
++            configspec=conf_specs
++        )
+ 
+         # next line fixes a problem with creating empty strings in default values for configobj
+         config['device_mac'] = ''

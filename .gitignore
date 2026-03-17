@@ -1,0 +1,4 @@
+.direnv/
+
+# Ignore build results
+result
