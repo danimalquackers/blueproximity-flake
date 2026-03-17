@@ -39,43 +39,43 @@ in
 
             lockCommand = mkOption {
               type = types.str;
-              default = "loginctl lock-session";
+              default = "gnome-screensaver-command -l";
               description = "Command to execute when the device goes out of range.";
             };
 
             unlockCommand = mkOption {
               type = types.str;
-              default = "loginctl unlock-session";
+              default = "gnome-screensaver-command -d";
               description = "Command to execute when the device comes in range.";
             };
 
             lockDistance = mkOption {
               type = types.int;
-              default = 10;
+              default = 7;
               description = "The maximum distance in meters.";
             };
 
             lockDuration = mkOption {
               type = types.int;
-              default = 5;
+              default = 6;
               description = "The duration in seconds for the device to be out of range before locking.";
             };
 
             unlockDistance = mkOption {
               type = types.int;
-              default = 5;
+              default = 4;
               description = "The minimum distance in meters.";
             };
 
             unlockDuration = mkOption {
               type = types.int;
-              default = 3;
+              default = 1;
               description = "The duration in seconds for the device to be in range before unlocking.";
             };
 
             proximityCommand = mkOption {
               type = types.str;
-              default = "xset dpms force on";
+              default = "gnome-screensaver-command -p";
               description = "Command to execute when the device is in range.";
             };
 
